@@ -1,23 +1,21 @@
 package fr.sncf.osrd.speedcontroller.generators;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import fr.sncf.osrd.train.TrainSchedule;
 import fr.sncf.osrd.railjson.schema.schedule.RJSAllowance;
 import fr.sncf.osrd.railjson.schema.schedule.RJSAllowance.MarecoAllowance.MarginType;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import fr.sncf.osrd.train.TrainSchedule;
 import fr.sncf.osrd.simulation.Simulation;
 import fr.sncf.osrd.speedcontroller.CoastingSpeedController;
 import fr.sncf.osrd.speedcontroller.LimitAnnounceSpeedController;
 import fr.sncf.osrd.speedcontroller.MaxSpeedController;
 import fr.sncf.osrd.speedcontroller.SpeedController;
-import fr.sncf.osrd.train.*;
+import fr.sncf.osrd.train.Action;
+import fr.sncf.osrd.train.Train;
+import fr.sncf.osrd.train.TrainPhysicsIntegrator;
+import fr.sncf.osrd.train.TrainPositionTracker;
 import fr.sncf.osrd.utils.SortedDoubleMap;
-import fr.sncf.osrd.utils.TrackSectionLocation;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
+import java.util.*;
 
 public class MarecoAllowanceGenerator extends DichotomyControllerGenerator {
 
@@ -39,26 +37,74 @@ public class MarecoAllowanceGenerator extends DichotomyControllerGenerator {
         return baseTime * (1 + value / 100);
     }
 
+    public double vf(double v1) {
+        var a = schedule.rollingStock.A;
+        var b = schedule.rollingStock.B;
+        var c = schedule.rollingStock.C;
+        return (2*c*v1*v1*v1 + b*v1*v1)/(3*c*v1*v1 + 2*b*v1 + a);
+    }
+
+    // we will try to find v1 so that f(v1, vmax) == 0
+    public double f(double v1, double vmax) {
+        return vf(v1) - vmax;
+    }
+
+    //df(v1, vmax)/dv1 /*first derivative*/
+    public double fprime(double v1, double vmax) {
+        var a = schedule.rollingStock.A;
+        var b = schedule.rollingStock.B;
+        var c = schedule.rollingStock.C;
+        var v = (3*c*v1*v1 + 2*b*v1 + a);
+        var vprime = (6*c*v1 + 2*b);
+        var u = (2*c*v1*v1*v1 + b*v1*v1) - vmax * v;
+        var uprime = (6*c*v1*v1 + 2*b*v1) - vmax * vprime;
+        return (uprime * v - vprime * u) / (v * v);
+    }
+
     @Override
     protected double getFirstLowEstimate() {
         return 0;
     }
 
+    // get the high boundary for the binary search, corresponding to vf = max
     @Override
     protected double getFirstHighEstimate() {
         double max = 0;
         double position = sectionBegin;
-        while (position < sectionEnd) {
+        double endLocation = sectionEnd;
+        // get max allowed speed
+        while (position < endLocation) {
             double val = SpeedController.getDirective(maxSpeedControllers, position).allowedSpeed;
             if (val > max)
                 max = val;
             position += 1;
         }
-        // TODO find better way to define it
-        return max * 2;
+
+        double tolerance = .000001; // Stop if you're close enough
+        int max_count = 200; // Maximum number of Newton's method iterations
+        double x = max * 3/2; // at high v1 the equation vf = f(v1) tends to be vf = 2*v1/3
+
+        for( int count=1;
+            //Carry on till we're close, or we've run it 200 times.
+             (Math.abs(f(x, max)) > tolerance) && ( count < max_count);
+             count ++)  {
+
+            x= x - f(x, max)/fprime(x, max);  //Newtons method.
+        }
+
+        if( Math.abs(f(x, max)) <= tolerance) {
+            return x;
+        } else {
+            return max * 2; // if no value has been found return a high value to have some margin
+        }
     }
 
-    private List<Double> findPositionSameSpeedAsVF(SortedDoubleMap speeds, double vf) {
+    @Override
+    protected double getFirstGuess() {
+        return this.getFirstHighEstimate()/(1 + value / 100);
+    }
+
+    private List<Double> findPositionSameSpeedAsVF(NavigableMap<Double, Double> speeds, double vf) {
         // TODO check only in deceleration intervals
         boolean isLastSpeedBelowVF = true;
         var res = new ArrayList<Double>();
@@ -130,16 +176,13 @@ public class MarecoAllowanceGenerator extends DichotomyControllerGenerator {
     }
 
     @Override
-    protected Set<SpeedController> getSpeedControllers(TrainSchedule schedule, double v1,
-                                                       double startLocation, double endLocation) {
+    protected Set<SpeedController> getSpeedControllers(TrainSchedule schedule, double v1, double startLocation, double endLocation) {
         double timestep = 0.01; // TODO: link this timestep to the rest of the simulation
-        var wle = (2 * schedule.rollingStock.C * v1 + schedule.rollingStock.B) * v1 * v1;
-        var vf = wle * v1 / (wle + schedule.rollingStock.rollingResistance(v1) * v1);
+        var vf = vf(v1);
 
         var currentSpeedControllers = new HashSet<>(maxSpeedControllers);
         currentSpeedControllers.add(new MaxSpeedController(v1, startLocation, endLocation));
-        var expectedSpeeds = getExpectedSpeeds(sim, schedule, currentSpeedControllers, timestep,
-                startLocation, endLocation, initialSpeed);
+        var expectedSpeeds = getExpectedSpeeds(sim, schedule, currentSpeedControllers, timestep);
 
         for (var location : findPositionSameSpeedAsVF(expectedSpeeds, vf)) {
             var controller = generateCoastingSpeedControllerAtPosition(expectedSpeeds, location, timestep);

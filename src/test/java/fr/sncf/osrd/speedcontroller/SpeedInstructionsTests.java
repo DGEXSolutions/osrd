@@ -3,6 +3,13 @@ package fr.sncf.osrd.speedcontroller;
 import static fr.sncf.osrd.Helpers.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import fr.sncf.osrd.infra.*;
+import fr.sncf.osrd.infra.trackgraph.SwitchPosition;
+import fr.sncf.osrd.railjson.parser.RailJSONParser;
+import fr.sncf.osrd.simulation.Simulation;
+import fr.sncf.osrd.simulation.SimulationError;
+import fr.sncf.osrd.railjson.schema.schedule.RJSAllowance;
+import fr.sncf.osrd.railjson.schema.schedule.RJSAllowance.LinearAllowance.MarginType;
 import fr.sncf.osrd.speedcontroller.generators.LinearAllowanceGenerator;
 import fr.sncf.osrd.train.TrainSchedule;
 import fr.sncf.osrd.infra.InvalidInfraException;
@@ -15,7 +22,11 @@ import fr.sncf.osrd.speedcontroller.generators.SpeedControllerGenerator;
 import fr.sncf.osrd.train.Train;
 import fr.sncf.osrd.train.events.TrainMoveEvent;
 import fr.sncf.osrd.train.events.TrainReachesActionPoint;
+import fr.sncf.osrd.train.phases.SignalNavigatePhase;
+import org.jaxen.util.SingletonList;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -116,11 +127,12 @@ public class SpeedInstructionsTests {
         run(sim, config);
     }
 
-    @Test
-    public void testMargin50() throws InvalidInfraException {
+    @ParameterizedTest
+    @ValueSource(doubles = {0, 50, 200})
+    public void testLinearAllowance(double value) throws InvalidInfraException {
         final var infra = getBaseInfra();
         assert infra != null;
-        var params = new LinearAllowanceGenerator(0, Double.POSITIVE_INFINITY, 50, MarginType.TIME);
+        var params = new LinearAllowanceGenerator(0, Double.POSITIVE_INFINITY, value, MarginType.TIME);
 
         // base run, no margin
         final var config = getBaseConfigNoAllowance();
@@ -133,53 +145,8 @@ public class SpeedInstructionsTests {
         var sim2 = Simulation.createFromInfra(RailJSONParser.parse(infra), 0, null);
         run(sim2, configMargins);
         var marginsSimTime = sim2.getTime();
-        var expected = baseSimTime * 1.5;
+        var expected = baseSimTime * (1 + value / 100);
         assertEquals(expected, marginsSimTime, expected * 0.01);
-    }
-
-    @Test
-    public void testMargin200() throws InvalidInfraException {
-        final var infra = getBaseInfra();
-        assert infra != null;
-        var params = new LinearAllowanceGenerator(0, Double.POSITIVE_INFINITY, 200, MarginType.TIME);
-
-        // base run, no margin
-        final var config = getBaseConfigNoAllowance();
-        var sim = Simulation.createFromInfra(RailJSONParser.parse(infra), 0, null);
-        var eventsBase = run(sim, config);
-        var baseSimTime = sim.getTime();
-
-        // Run with 200% margins
-        final var configMargins = getConfigWithSpeedInstructions(SpeedInstructions.fromController(params));
-        var sim2 = Simulation.createFromInfra(RailJSONParser.parse(infra), 0, null);
-        var events = run(sim2, configMargins);
-        var marginsSimTime = sim2.getTime();
-        var expected = baseSimTime * 3;
-        saveGraph(events, "margin-200-out.csv");
-        saveGraph(eventsBase, "margin-200-base.csv");
-        assertEquals(expected, marginsSimTime, expected * 0.01);
-    }
-
-    @Test
-    public void testMargin0() throws InvalidInfraException {
-        final var infra = getBaseInfra();
-        assert infra != null;
-        var params = new LinearAllowanceGenerator(0, Double.POSITIVE_INFINITY, 0, MarginType.TIME);
-
-        // base run, no margin
-        final var config = getBaseConfigNoAllowance();
-        var sim = Simulation.createFromInfra(RailJSONParser.parse(infra), 0, null);
-        var eventsBase = run(sim, config);
-        var baseSimTime = sim.getTime();
-
-        // Run with 0% margins
-        final var configMargins = getConfigWithSpeedInstructions(SpeedInstructions.fromController(params));
-        var sim2 = Simulation.createFromInfra(RailJSONParser.parse(infra), 0, null);
-        var events = run(sim2, configMargins);
-        var marginsSimTime = sim2.getTime();
-        saveGraph(events, "margin-0-out.csv");
-        saveGraph(eventsBase, "margin-0-base.csv");
-        assertEquals(baseSimTime, marginsSimTime, baseSimTime * 0.01);
     }
 
     /** Helper function: returns true if the train is late at the time it is called */
