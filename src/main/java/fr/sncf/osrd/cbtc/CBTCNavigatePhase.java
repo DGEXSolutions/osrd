@@ -13,6 +13,7 @@ import fr.sncf.osrd.train.Train;
 import fr.sncf.osrd.train.TrainPath;
 import fr.sncf.osrd.train.TrainSchedule;
 import fr.sncf.osrd.train.TrainState;
+import fr.sncf.osrd.train.TrainStatus;
 import fr.sncf.osrd.train.TrainStop;
 import fr.sncf.osrd.train.events.TrainMoveEvent;
 import fr.sncf.osrd.train.events.TrainReachesActionPoint;
@@ -114,6 +115,10 @@ public final class CBTCNavigatePhase extends NavigatePhase {
                     return nextState.simulatePhase(train, sim);
             }
 
+            // The time of the next CBTC position update (the 1e-9 is here to prevent from double division error)
+            // TODO : find a better way to do this
+            double nextTime = 0.2 * (Math.floor(sim.getTime() / 0.2 + 1e-9) + 1);
+
             // 1) find the next interaction event
             var nextInteraction = peekInteraction(trainState);
 
@@ -121,7 +126,7 @@ public final class CBTCNavigatePhase extends NavigatePhase {
             addInteractionUnderTrain(trainState, nextInteraction);
 
             // 3) simulate up to nextEventTrackPosition
-            var simulationResult = trainState.evolveStateUntilPosition(sim, nextInteraction.position);
+            var simulationResult = trainState.evolveStateUntilTimeOrPosition(sim, nextTime, nextInteraction.position);
 
             // 4) create an event with simulation data up to this point
 
@@ -130,8 +135,15 @@ public final class CBTCNavigatePhase extends NavigatePhase {
                 popInteraction(trainState);
                 return TrainReachesActionPoint.plan(sim, trainState.time, train, simulationResult, nextInteraction);
             }
+
             // The train didn't reached the action point (stopped because of signalisation)
-            return TrainMoveEvent.plan(sim, trainState.time, train, simulationResult);
+            var event = TrainMoveEvent.plan(sim, trainState.time, train, simulationResult);
+
+            if(train.getLastState().status != TrainStatus.REACHED_DESTINATION && train.getLastState().status != TrainStatus.STOP){
+                CBTCEvent.plan(sim, nextTime, train);
+            }
+
+            return event;
         }
 
         /**
