@@ -31,6 +31,7 @@ import fr.sncf.osrd.train.decisions.InteractiveInput;
 import fr.sncf.osrd.train.decisions.KeyboardInput;
 import fr.sncf.osrd.train.decisions.TrainDecisionMaker;
 import fr.sncf.osrd.train.decisions.TrainDecisionMaker.DefaultTrainDecisionMaker;
+import fr.sncf.osrd.train.phases.NavigatePhase;
 import fr.sncf.osrd.train.phases.Phase;
 import fr.sncf.osrd.train.phases.PhaseState;
 import fr.sncf.osrd.train.phases.SignalNavigatePhase;
@@ -75,7 +76,11 @@ public class ChangeSerializer {
             .add(new SerializableDoubleAdapter())
             .add(adaptPolymorphicType(Change.class, "changeType"))
             .add(PolymorphicJsonAdapterFactory.of(Phase.class, "phaseType")
-                    .withSubtype(SignalNavigatePhase.class, "navigatePhase")
+                    .withSubtype(NavigatePhase.class, "navigatePhase")
+                    .withSubtype(SignalNavigatePhase.class, "signalNavigatePhase")
+            )
+            .add(PolymorphicJsonAdapterFactory.of(NavigatePhase.class, "phaseType")
+                    .withSubtype(SignalNavigatePhase.class, "signalNavigatePhase")
             )
             .add(adaptPolymorphicType(PhaseState.class, "phaseStateType"))
             .add(PolymorphicJsonAdapterFactory.of(ActionPoint.class, "actionPointType")

@@ -3,6 +3,7 @@ package fr.sncf.osrd.infra.signaling;
 import fr.sncf.osrd.train.Interaction;
 import fr.sncf.osrd.train.InteractionType;
 import fr.sncf.osrd.train.TrainState;
+import fr.sncf.osrd.train.phases.NavigatePhaseState;
 import fr.sncf.osrd.train.phases.SignalNavigatePhase;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -26,7 +27,7 @@ public abstract class AspectConstraint {
         }
 
         /** Convert to a path position given a phase a train state */
-        public double convert(SignalNavigatePhase.State navigatePhase, TrainState trainState) {
+        public double convert(NavigatePhaseState navigatePhase, TrainState trainState) {
             Predicate<Interaction> isSignal = interaction -> interaction.interactionType == InteractionType.HEAD
                     && interaction.actionPoint.getClass() == Signal.class;
             Interaction interactionElement = null;
