@@ -1,26 +1,22 @@
 package fr.sncf.osrd.train.phases;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import fr.sncf.osrd.infra.StopActionPoint;
-import fr.sncf.osrd.train.TrainSchedule;
-import fr.sncf.osrd.infra.signaling.AspectConstraint;
-import fr.sncf.osrd.infra.signaling.Signal;
-import fr.sncf.osrd.infra.trackgraph.TrackSection;
-import fr.sncf.osrd.infra_state.SignalState;
 import fr.sncf.osrd.simulation.Simulation;
 import fr.sncf.osrd.simulation.SimulationError;
 import fr.sncf.osrd.simulation.TimelineEvent;
-import fr.sncf.osrd.speedcontroller.LimitAnnounceSpeedController;
-import fr.sncf.osrd.speedcontroller.MaxSpeedController;
 import fr.sncf.osrd.speedcontroller.SpeedController;
-import fr.sncf.osrd.train.*;
+import fr.sncf.osrd.train.Interaction;
+import fr.sncf.osrd.train.Train;
+import fr.sncf.osrd.train.TrainPath;
+import fr.sncf.osrd.train.TrainSchedule;
+import fr.sncf.osrd.train.TrainState;
+import fr.sncf.osrd.train.TrainStop;
 import fr.sncf.osrd.train.events.TrainMoveEvent;
 import fr.sncf.osrd.train.events.TrainReachesActionPoint;
 import fr.sncf.osrd.utils.TrackSectionLocation;
-
-import java.util.*;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 public final class SignalNavigatePhase extends NavigatePhase {
 

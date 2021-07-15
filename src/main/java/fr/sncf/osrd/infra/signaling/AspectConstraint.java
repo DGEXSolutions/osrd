@@ -1,13 +1,12 @@
 package fr.sncf.osrd.infra.signaling;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Predicate;
+
 import fr.sncf.osrd.train.Interaction;
 import fr.sncf.osrd.train.InteractionType;
 import fr.sncf.osrd.train.TrainState;
 import fr.sncf.osrd.train.phases.NavigatePhaseState;
-import fr.sncf.osrd.train.phases.SignalNavigatePhase;
-
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Predicate;
 
 public abstract class AspectConstraint {
 
