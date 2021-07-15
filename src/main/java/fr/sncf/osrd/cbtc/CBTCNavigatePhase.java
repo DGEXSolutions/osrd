@@ -154,6 +154,13 @@ public final class CBTCNavigatePhase extends NavigatePhase {
             var controllers = new ArrayList<SpeedController>();
             for (var signalControllers : signalControllers.values())
                 controllers.addAll(signalControllers);
+
+            TrainState trainState = sim.trains.get(schedule.trainID).getLastState();
+            if (trainState != null) {
+                CBTCATP atp = new CBTCATP(sim, schedule, trainState);
+                controllers.addAll(atp.directive());
+            }
+
             return controllers;
         }
     }
