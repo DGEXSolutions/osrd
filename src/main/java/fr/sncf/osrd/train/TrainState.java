@@ -7,8 +7,8 @@ import fr.sncf.osrd.simulation.Simulation;
 import fr.sncf.osrd.simulation.SimulationError;
 import fr.sncf.osrd.simulation.TimelineEvent;
 import fr.sncf.osrd.speedcontroller.SpeedDirective;
+import fr.sncf.osrd.train.phases.NavigatePhaseState;
 import fr.sncf.osrd.train.phases.PhaseState;
-import fr.sncf.osrd.train.phases.SignalNavigatePhase;
 import fr.sncf.osrd.utils.DeepComparable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -247,9 +247,10 @@ public final class TrainState implements Cloneable, DeepComparable<TrainState> {
 
     /** Add or update aspects constraint of a signal */
     public void setAspectConstraints(SignalState signalState) {
-        if (currentPhaseState.getClass() != SignalNavigatePhase.State.class)
-            throw new RuntimeException("Expected SignalNavigatePhase state");
-        var navigatePhase = (SignalNavigatePhase.State) currentPhaseState;
+        if (!(currentPhaseState instanceof NavigatePhaseState)) {
+            throw new RuntimeException("Expected NavigatePhaseState");
+        }
+        var navigatePhase = (NavigatePhaseState) currentPhaseState;
         navigatePhase.setAspectConstraints(signalState, this);
     }
 

@@ -23,14 +23,14 @@ public abstract class NavigatePhaseState extends PhaseState {
     protected final transient TrainSchedule schedule;
     protected final transient HashMap<Signal, ArrayList<SpeedController>> signalControllers;
 
-    NavigatePhaseState(SignalNavigatePhase phase, Simulation sim, TrainSchedule schedule) {
+    protected NavigatePhaseState(NavigatePhase phase, Simulation sim, TrainSchedule schedule) {
         this.sim = sim;
         this.schedule = schedule;
         this.phase = phase;
         this.signalControllers = new HashMap<>();
     }
 
-    NavigatePhaseState(NavigatePhaseState state) {
+    protected NavigatePhaseState(NavigatePhaseState state) {
         this.phase = state.phase;
         this.interactionsPathIndex = state.interactionsPathIndex;
         this.signalControllers = state.signalControllers;
