@@ -7,6 +7,14 @@ gradlew*
 *.jar
 .jqwik-database
 
+# vscode
+*.class
+.classpath
+.project
+.vscode
+.settings
+bin
+
 # avoid mistakenly adding proprietary files
 *.rsl
 *.xml
