@@ -424,6 +424,56 @@
       "speed": 16.666666666666668
     }
   ],
+  "catenaries":[
+    {
+      "id":"tractive_effort_curve_catenary_A",
+      "type":"A"
+    },
+    {
+      "id":"tractive_effort_curve_catenary_A1",
+      "type":"A1"
+    },
+    {
+      "id":"tractive_effort_curve_catenary_B",
+      "type":"B"
+    },
+    {
+      "id":"tractive_effort_curve_catenary_B1",
+      "type":"B1"
+    },
+    {
+      "id":"tractive_effort_curve_catenary_C",
+      "type":"C"
+    },
+    {
+      "id":"tractive_effort_curve_catenary_D",
+      "type":"D"
+    },
+    {
+      "id":"tractive_effort_curve_catenary_E",
+      "type":"E"
+    },
+    {
+      "id":"tractive_effort_curve_catenary_F",
+      "type":"F"
+    },
+    {
+      "id":"tractive_effort_curve_catenary_O",
+      "type":"O"
+    },
+    {
+      "id":"tractive_effort_curve_catenary_25k",
+      "type":"25k"
+    },
+    {
+      "id":"tractive_effort_curve_catenary_20/22k",
+      "type":"20/22k"
+    },
+    {
+      "id":"tractive_effort_curve_catenary_battery",
+      "type":"battery"
+    }
+  ],
   "switches": [
     {
       "base": {
@@ -620,6 +670,20 @@
           "begin": 2000,
           "end": 6000,
           "ref": "speedsection.mid_limit"
+        }
+      ],
+      "catenaries": [
+        {
+          "applicable_direction": "BOTH",
+          "begin": 1000,
+          "end": 5000,
+          "ref": "tractive_effort_curve_catenary_A"
+        },
+        {
+          "applicable_direction": "BOTH",
+          "begin": 5000,
+          "end": 10000,
+          "ref": "tractive_effort_curve_catenary_B"
         }
       ]
     },

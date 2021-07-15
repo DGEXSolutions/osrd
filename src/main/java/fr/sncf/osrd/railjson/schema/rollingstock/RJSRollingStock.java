@@ -3,6 +3,8 @@ package fr.sncf.osrd.railjson.schema.rollingstock;
 import com.squareup.moshi.Json;
 import fr.sncf.osrd.railjson.schema.common.Identified;
 
+import java.util.Map;
+
 public class RJSRollingStock implements Identified {
     /** An unique train identifier */
     public String id;
@@ -56,8 +58,10 @@ public class RJSRollingStock implements Identified {
      * Associates a speed to a force.
      * https://en.wikipedia.org/wiki/Tractive_force#Tractive_effort_curves
      */
-    @Json(name = "tractive_effort_curve")
-    public RJSTractiveEffortPoint[] tractiveEffortCurve;
+
+    @Json(name = "tractive_effort_curves")
+    public Map<String, RJSTractiveEffortPoint[]> tractiveEffortCurves;
+
 
     /** Creates a new rolling stock */
     public RJSRollingStock(
@@ -72,7 +76,7 @@ public class RJSRollingStock implements Identified {
             double startUpAcceleration,
             double comfortAcceleration,
             double timetableGamma,
-            RJSTractiveEffortPoint[] tractiveEffortCurve
+            Map<String, RJSTractiveEffortPoint[]> tractiveEffortCurves
     ) {
         this.id = id;
         this.length = length;
@@ -85,7 +89,8 @@ public class RJSRollingStock implements Identified {
         this.startUpAcceleration = startUpAcceleration;
         this.comfortAcceleration = comfortAcceleration;
         this.timetableGamma = timetableGamma;
-        this.tractiveEffortCurve = tractiveEffortCurve;
+        this.tractiveEffortCurves = tractiveEffortCurves;
+
     }
 
     /** Creates an empty rolling stock */
@@ -101,7 +106,8 @@ public class RJSRollingStock implements Identified {
         this.startUpAcceleration = Double.NaN;
         this.comfortAcceleration = Double.NaN;
         this.timetableGamma = Double.NaN;
-        this.tractiveEffortCurve = null;
+        this.tractiveEffortCurves = null;
+
     }
 
     public static final class RJSTractiveEffortPoint {

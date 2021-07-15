@@ -7,6 +7,7 @@ import fr.sncf.osrd.railjson.schema.infra.trackobjects.RJSRouteWaypoint;
 import fr.sncf.osrd.railjson.schema.infra.trackobjects.RJSSignal;
 import fr.sncf.osrd.railjson.schema.infra.trackranges.RJSOperationalPointPart;
 import fr.sncf.osrd.railjson.schema.infra.trackranges.RJSSpeedSectionPart;
+import fr.sncf.osrd.railjson.schema.infra.trackranges.RJSCatenarySectionPart;
 import fr.sncf.osrd.utils.graph.EdgeEndpoint;
 
 import java.util.ArrayList;
@@ -32,6 +33,10 @@ public class RJSTrackSection implements Identified {
     @Json(name = "speed_sections")
     public List<RJSSpeedSectionPart> speedSections;
 
+    /** List of the catenaries on the track section */
+    @Json(name = "catenaries")
+    public List<RJSCatenarySectionPart> catenaries;
+
     @Json(name = "endpoints_coords")
     public List<List<Double>> endpointCoords;
 
@@ -42,7 +47,8 @@ public class RJSTrackSection implements Identified {
             List<RJSRouteWaypoint> routeWaypoints,
             List<RJSSignal> signals,
             List<RJSOperationalPointPart> operationalPoints,
-            List<RJSSpeedSectionPart> speedSections
+            List<RJSSpeedSectionPart> speedSections,
+            List<RJSCatenarySectionPart> catenaries
     ) {
         this.id = id;
         this.length = length;
@@ -50,13 +56,14 @@ public class RJSTrackSection implements Identified {
         this.signals = signals;
         this.operationalPoints = operationalPoints;
         this.speedSections = speedSections;
+        this.catenaries = catenaries;
     }
 
     public RJSTrackSection(
             String id,
             double length
     ) {
-        this(id, length, new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
+        this(id, length, new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
     }
 
     @Override
