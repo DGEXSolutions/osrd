@@ -114,4 +114,9 @@ public class RSExprVisitor {
         nextSignal.signal.accept(this);
         nextSignal.route.accept(this);
     }
+
+    /** Visit method */
+    public void visit(RSExpr.IsIncomingRouteCBTC expr) throws InvalidInfraException {
+        expr.routeExpr.accept(this);
+    }
 }

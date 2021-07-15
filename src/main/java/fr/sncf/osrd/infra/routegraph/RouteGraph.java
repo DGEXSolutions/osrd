@@ -30,6 +30,16 @@ public class RouteGraph extends DirNGraph<Route, Waypoint> {
         return node.getRouteNeighbors(nodeDirection);
     }
 
+    /** Return the neighbors of the route at the start node */
+    public List<Route> getIncomingNeighbors(Route route) {
+        var firstTvdSectionPathIndex = 0;
+        var firstTvdSectionPath = route.tvdSectionsPaths.get(firstTvdSectionPathIndex);
+        var firstTvdSectionPathDir = route.tvdSectionsPathDirections.get(firstTvdSectionPathIndex);
+        var node = getNode(firstTvdSectionPath.getStartNode(firstTvdSectionPathDir));
+        var nodeDirection = firstTvdSectionPath.nodeDirection(firstTvdSectionPathDir, EdgeEndpoint.BEGIN);
+        return node.getIncomingRouteNeighbors(nodeDirection);
+    }
+
     public static class Builder {
         public RouteGraph routeGraph = new RouteGraph();
         public final WaypointGraph waypointGraph;
@@ -115,6 +125,13 @@ public class RouteGraph extends DirNGraph<Route, Waypoint> {
             var waypointDirection = firstTVDSectionPath.nodeDirection(firstTVDSectionPathDir, EdgeEndpoint.BEGIN);
             startWaypoint.getRouteNeighbors(waypointDirection).add(route);
 
+            // Link route to the ending waypoint
+            var lastTVDSectionPath = tvdSectionsPath.get(0);
+            var lastTVDSectionPathDir = tvdSectionsPathDirection.get(0);
+            var endWaypoint = waypointGraph.getNode(lastTVDSectionPath.getEndNode(lastTVDSectionPathDir));
+            var endWaypointDirection = lastTVDSectionPath.nodeDirection(lastTVDSectionPathDir, EdgeEndpoint.END);
+            endWaypoint.getIncomingRouteNeighbors(endWaypointDirection).add(route);
+            
             // Link route to track sections and tvd sections
             double routeOffset = 0;
             for (int i = 0; i < route.tvdSectionsPaths.size(); i++) {

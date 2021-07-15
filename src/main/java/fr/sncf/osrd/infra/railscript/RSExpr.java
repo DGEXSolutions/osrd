@@ -1,7 +1,17 @@
 package fr.sncf.osrd.infra.railscript;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+
 import fr.sncf.osrd.infra.InvalidInfraException;
-import fr.sncf.osrd.infra.railscript.value.*;
+import fr.sncf.osrd.infra.railscript.value.RSAspectSet;
+import fr.sncf.osrd.infra.railscript.value.RSBool;
+import fr.sncf.osrd.infra.railscript.value.RSMatchable;
+import fr.sncf.osrd.infra.railscript.value.RSOptional;
+import fr.sncf.osrd.infra.railscript.value.RSType;
+import fr.sncf.osrd.infra.railscript.value.RSValue;
 import fr.sncf.osrd.infra.routegraph.Route;
 import fr.sncf.osrd.infra.signaling.Aspect;
 import fr.sncf.osrd.infra.signaling.Signal;
@@ -10,10 +20,6 @@ import fr.sncf.osrd.infra_state.RouteState;
 import fr.sncf.osrd.infra_state.RouteStatus;
 import fr.sncf.osrd.infra_state.SignalState;
 import fr.sncf.osrd.infra_state.SwitchState;
-
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
 
 public abstract class RSExpr<T extends RSValue> {
     /**
@@ -694,6 +700,35 @@ public abstract class RSExpr<T extends RSValue> {
         @Override
         public RSType getType(RSType[] argumentTypes) {
             return RSType.OPTIONAL_SIGNAL;
+        }
+
+        @Override
+        public void accept(RSExprVisitor visitor) throws InvalidInfraException {
+            visitor.visit(this);
+        }
+    }
+
+    public static final class IsIncomingRouteCBTC extends RSExpr<RSBool> {
+        public final RSExpr<RouteState> routeExpr;
+
+        public IsIncomingRouteCBTC(RSExpr<RouteState> routeExpr) {
+            this.routeExpr = routeExpr;
+        }
+
+        @Override
+        public RSBool evaluate(RSExprState<?> state) {
+            List<Route> routes = state.infraState.getInfra().routeGraph.getIncomingNeighbors(routeExpr.evaluate(state).route);
+            for(Route route : routes) {
+                if(state.infraState.getRouteState(route.index).hasCBTCStatus()) {
+                    return RSBool.from(true);
+                }
+            }
+            return RSBool.from(false);
+        }
+
+        @Override
+        public RSType getType(RSType[] argumentTypes) {
+            return RSType.BOOLEAN;
         }
 
         @Override

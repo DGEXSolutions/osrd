@@ -167,6 +167,11 @@ public final class RouteState implements RSMatchable {
         return status == o.status;
     }
 
+    public boolean hasCBTCStatus() {
+        return status == RouteStatus.CBTC_OCCUPIED || status == RouteStatus.CBTC_RESERVED
+                || status == RouteStatus.CBTC_REQUESTED;
+    }
+
     public static class RouteStatusChange extends EntityChange<RouteState, Void> {
         public final RouteStatus newStatus;
         public final int routeIndex;

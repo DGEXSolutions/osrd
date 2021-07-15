@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.stream.Stream;
 
 public final class InfraState implements DeepComparable<InfraState> {
+    private final Infra infra;
     private final SignalState[] signalSignalStates;
     private final RouteState[] routeStates;
     private final SwitchState[] switchStates;
@@ -16,11 +17,13 @@ public final class InfraState implements DeepComparable<InfraState> {
 
     @SuppressFBWarnings("EI_EXPOSE_REP2")
     private InfraState(
+            Infra infra,
             SignalState[] signalSignalStates,
             RouteState[] routeStates,
             SwitchState[] switchStates,
             TVDSectionState[] tvdSectionStates
     ) {
+        this.infra = infra;
         this.signalSignalStates = signalSignalStates;
         this.routeStates = routeStates;
         this.switchStates = switchStates;
@@ -45,6 +48,10 @@ public final class InfraState implements DeepComparable<InfraState> {
 
     public TVDSectionState getTvdSectionState(int tvdSectionIndex) {
         return tvdSectionStates[tvdSectionIndex];
+    }
+
+    public Infra getInfra() {
+        return infra;
     }
 
     @Override
@@ -81,6 +88,6 @@ public final class InfraState implements DeepComparable<InfraState> {
         for (var tvdSection : infra.tvdSections.values())
             tvdSectionStates[tvdSection.index] = new TVDSectionState(tvdSection);
 
-        return new InfraState(signalStates, routeStates, switchStates, tvdSectionStates);
+        return new InfraState(infra, signalStates, routeStates, switchStates, tvdSectionStates);
     }
 }

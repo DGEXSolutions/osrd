@@ -222,6 +222,11 @@ public class RailScriptExprParser {
             var routeExpr = parseRouteExpr(nextSignalExpr.route);
             return new RSExpr.NextSignal(signalExpr, routeExpr);
         }
+        if (type == RJSRSExpr.IsIncomingRouteCBTC.class) {
+            var incomingRouteExpr = (RJSRSExpr.IsIncomingRouteCBTC) expr;
+            var route = parseRouteExpr(incomingRouteExpr.route);
+            return new RSExpr.IsIncomingRouteCBTC(route);
+        }
 
         throw new InvalidInfraException(String.format("'%s' unsupported signal expression", type));
     }
@@ -286,14 +291,20 @@ public class RailScriptExprParser {
         switch (state) {
             case FREE:
                 return RouteStatus.FREE;
+            case REQUESTED:
+                return RouteStatus.REQUESTED;
             case RESERVED:
                 return RouteStatus.RESERVED;
             case OCCUPIED:
                 return RouteStatus.OCCUPIED;
+            case CBTC_REQUESTED:
+                return RouteStatus.CBTC_REQUESTED;
+            case CBTC_RESERVED:
+                return RouteStatus.CBTC_RESERVED;
+            case CBTC_OCCUPIED:
+                return RouteStatus.CBTC_OCCUPIED;
             case CONFLICT:
                 return RouteStatus.CONFLICT;
-            case REQUESTED:
-                return RouteStatus.REQUESTED;
         }
         throw new RuntimeException("unsupported RailJSON route state");
     }

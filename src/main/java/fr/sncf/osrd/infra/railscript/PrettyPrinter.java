@@ -326,4 +326,11 @@ public class PrettyPrinter extends RSExprVisitor {
         nextSignal.signal.accept(this);
         out.print(")");
     }
+
+    @Override
+    public void visit(RSExpr.IsIncomingRouteCBTC expr) throws InvalidInfraException {
+        out.print("is_incoming_route_cbtc(");
+        expr.routeExpr.accept(this);
+        out.print(")");
+    }
 }

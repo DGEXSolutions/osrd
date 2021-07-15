@@ -115,6 +115,7 @@ public abstract class RJSRSExpr {
                     .withSubtype(AspectSetContains.class, "aspect_set_contains")
                     .withSubtype(ReservedRoute.class, "reserved_route")
                     .withSubtype(NextSignal.class, "next_signal")
+                    .withSubtype(IsIncomingRouteCBTC.class, "is_incoming_route_cbtc")
     );
 
     // region BOOLEAN_LOGIC
@@ -405,6 +406,21 @@ public abstract class RJSRSExpr {
 
         public NextSignal(RJSRSExpr signal, RJSRSExpr route) {
             this.signal = signal;
+            this.route = route;
+        }
+    }
+
+    /**
+     * Returns whether a route preceding the given one is CBTC_RESERVED or
+     * CBTC_REQUESTED or CBTC OCCUPIED.
+     */
+    public static final class IsIncomingRouteCBTC extends RJSRSExpr {
+        /**
+         * The signal the condition checks for.
+         */
+        public RJSRSExpr route;
+
+        public IsIncomingRouteCBTC(RJSRSExpr route) {
             this.route = route;
         }
     }
