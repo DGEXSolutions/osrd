@@ -49,7 +49,8 @@ public class Train {
                 0,
                 phaseState,
                 new ArrayDeque<>(),
-                new TrainPath(schedule.plannedPath)
+                new TrainPath(schedule.plannedPath),
+                0
         );
 
         ActivateRoute.trainCreation(sim, initialState);
@@ -131,7 +132,7 @@ public class Train {
 
     /** Notify the train that a signal has change aspects and it have to re-evaluate its planned state */
     public void reactNewAspects(Simulation sim, SignalState signalState) throws SimulationError {
-        if (lastScheduledEvent.getState() == TimelineEvent.State.SCHEDULED) {
+        if (lastScheduledEvent != null && lastScheduledEvent.getState() == TimelineEvent.State.SCHEDULED) {
             // Cancel last scheduled event
             sim.cancel(lastScheduledEvent);
             // Recompute the state until current simulation time
