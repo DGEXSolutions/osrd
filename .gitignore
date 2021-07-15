@@ -8,13 +8,12 @@ gradlew*
 .jqwik-database
 
 # vscode
-
-.classpath
 *.class
-bin
+.classpath
 .project
 .vscode
 .settings
+bin
 
 # avoid mistakenly adding proprietary files
 *.rsl
