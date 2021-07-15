@@ -2,9 +2,7 @@ package fr.sncf.osrd.railjson.schema.schedule;
 
 import com.squareup.moshi.Json;
 import com.squareup.moshi.adapters.PolymorphicJsonAdapterFactory;
-import fr.sncf.osrd.railjson.schema.common.ID;
 import fr.sncf.osrd.railjson.schema.common.RJSTrackLocation;
-import fr.sncf.osrd.railjson.schema.infra.RJSRoute;
 
 /**
  * <p>A train phase corresponds to an operation during the lifetime of a scheduled train.

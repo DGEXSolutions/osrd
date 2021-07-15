@@ -2,13 +2,9 @@ package fr.sncf.osrd.speedcontroller;
 
 import static fr.sncf.osrd.Helpers.*;
 import static fr.sncf.osrd.railjson.schema.schedule.RJSAllowance.LinearAllowance.MarginType.TIME;
-import static fr.sncf.osrd.speedcontroller.SpeedInstructionsTests.getStaticGenerator;
 import static java.lang.Double.POSITIVE_INFINITY;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertSame;
 
-import fr.sncf.osrd.railjson.schema.common.ID;
-import fr.sncf.osrd.railjson.schema.common.RJSTrackLocation;
 import fr.sncf.osrd.speedcontroller.generators.ConstructionAllowanceGenerator;
 import fr.sncf.osrd.speedcontroller.generators.LinearAllowanceGenerator;
 import fr.sncf.osrd.speedcontroller.generators.MarecoAllowanceGenerator;
@@ -18,20 +14,12 @@ import fr.sncf.osrd.infra.InvalidInfraException;
 import fr.sncf.osrd.railjson.parser.RailJSONParser;
 import fr.sncf.osrd.railjson.schema.schedule.RJSAllowance;
 import fr.sncf.osrd.simulation.Simulation;
-import fr.sncf.osrd.simulation.TimelineEvent;
-import fr.sncf.osrd.train.TrainStop;
-import fr.sncf.osrd.train.events.TrainMoveEvent;
-import fr.sncf.osrd.train.events.TrainReachesActionPoint;
-import fr.sncf.osrd.train.phases.SignalNavigatePhase;
 import fr.sncf.osrd.utils.TrackSectionLocation;
 import org.junit.jupiter.api.Test;
 
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 
 public class MarginTests {

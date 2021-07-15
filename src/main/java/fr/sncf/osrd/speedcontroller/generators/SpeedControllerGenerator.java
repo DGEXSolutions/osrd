@@ -2,7 +2,6 @@ package fr.sncf.osrd.speedcontroller.generators;
 
 import static java.lang.Math.min;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fr.sncf.osrd.train.TrainSchedule;
 import fr.sncf.osrd.simulation.Simulation;
 import fr.sncf.osrd.speedcontroller.SpeedController;
@@ -115,7 +114,7 @@ public abstract class SpeedControllerGenerator {
             var integrator = TrainPhysicsIntegrator.make(timestep, schedule.rollingStock,
                     speed, location.maxTrainGrade());
             var action = integrator.actionToTargetSpeed(directive, schedule.rollingStock);
-            var distanceLeft = totalLength - location.getPathPosition();
+            var distanceLeft = min(totalLength - location.getPathPosition(), end - location.getPathPosition());
             var update =  integrator.computeUpdate(action, distanceLeft);
             speed = update.speed;
 

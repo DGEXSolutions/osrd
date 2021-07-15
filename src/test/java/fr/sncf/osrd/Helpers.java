@@ -1,7 +1,5 @@
 package fr.sncf.osrd;
 
-import static fr.sncf.osrd.railjson.schema.schedule.RJSAllowance.LinearAllowance.MarginType.TIME;
-import static java.lang.Double.POSITIVE_INFINITY;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.squareup.moshi.JsonReader;
@@ -9,41 +7,32 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import fr.sncf.osrd.config.Config;
 import fr.sncf.osrd.config.JsonConfig;
 import fr.sncf.osrd.infra.Infra;
-import fr.sncf.osrd.infra.InvalidInfraException;
 import fr.sncf.osrd.railjson.parser.RJSSimulationParser;
-import fr.sncf.osrd.railjson.parser.RailJSONParser;
+import fr.sncf.osrd.railjson.schema.RJSSimulation;
+import fr.sncf.osrd.infra.InvalidInfraException;
 import fr.sncf.osrd.railjson.parser.exceptions.InvalidRollingStock;
 import fr.sncf.osrd.railjson.parser.exceptions.InvalidSchedule;
-import fr.sncf.osrd.railjson.schema.RJSSimulation;
 import fr.sncf.osrd.railjson.schema.common.ID;
 import fr.sncf.osrd.railjson.schema.common.RJSTrackLocation;
 import fr.sncf.osrd.railjson.schema.infra.RJSInfra;
-import fr.sncf.osrd.railjson.schema.infra.RJSRoute;
-import fr.sncf.osrd.railjson.schema.schedule.RJSAllowance;
 import fr.sncf.osrd.railjson.schema.schedule.RJSTrainPhase;
 import fr.sncf.osrd.simulation.Simulation;
 import fr.sncf.osrd.simulation.SimulationError;
 import fr.sncf.osrd.simulation.TimelineEvent;
 import fr.sncf.osrd.simulation.TimelineEventId;
 import fr.sncf.osrd.speedcontroller.SpeedInstructions;
-import fr.sncf.osrd.speedcontroller.generators.ConstructionAllowanceGenerator;
-import fr.sncf.osrd.speedcontroller.generators.LinearAllowanceGenerator;
-import fr.sncf.osrd.speedcontroller.generators.SpeedControllerGenerator;
-import fr.sncf.osrd.train.TrainSchedule;
 import fr.sncf.osrd.train.events.TrainCreatedEvent;
 import fr.sncf.osrd.train.events.TrainMoveEvent;
 import fr.sncf.osrd.train.events.TrainReachesActionPoint;
 import fr.sncf.osrd.utils.PathUtils;
 import fr.sncf.osrd.utils.SortedDoubleMap;
-import fr.sncf.osrd.utils.TrackSectionLocation;
 import fr.sncf.osrd.utils.moshi.MoshiUtils;
 import okio.Okio;
-import org.junit.jupiter.api.Test;
 
 import java.io.*;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.ArrayList;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
@@ -263,7 +252,7 @@ public class Helpers {
                     jsonConfig.realTimeViewer,
                     jsonConfig.changeReplayCheck
             );
-        } catch (IOException | InvalidInfraException | InvalidRollingStock | InvalidSchedule e) {
+        } catch (IOException | InvalidInfraException | InvalidRollingStock | InvalidSchedule  e) {
             fail(e);
             throw new RuntimeException();
         }

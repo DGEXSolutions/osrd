@@ -1,15 +1,14 @@
 package fr.sncf.osrd.speedcontroller.generators;
 
-import fr.sncf.osrd.train.TrainSchedule;
 import fr.sncf.osrd.simulation.Simulation;
 import fr.sncf.osrd.speedcontroller.SpeedController;
-import fr.sncf.osrd.train.TrainPath;
+import fr.sncf.osrd.train.TrainSchedule;
 import fr.sncf.osrd.utils.SortedDoubleMap;
-import fr.sncf.osrd.utils.TrackSectionLocation;
 
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.util.NavigableMap;
 import java.util.Set;
 
 /** Generates a set of speed controller using a generic dichotomy */
@@ -25,7 +24,7 @@ public abstract class DichotomyControllerGenerator extends SpeedControllerGenera
     protected Set<SpeedController> maxSpeedControllers;
 
     /** Train schedule */
-    protected TrainSchedule schedule = null;
+    protected TrainSchedule schedule;
 
     /** Expected times from previous evaluation */
     protected SortedDoubleMap expectedTimes;
@@ -33,7 +32,8 @@ public abstract class DichotomyControllerGenerator extends SpeedControllerGenera
     /** Simulation state given in `generate` parameters */
     protected Simulation sim;
 
-    /** Constructor */
+    /** Constructor
+     * @param precision how close we need to be to the target time (in seconds) */
     protected DichotomyControllerGenerator(double begin, double end, double precision) {
         super(begin, end);
         this.precision = precision;
@@ -66,6 +66,9 @@ public abstract class DichotomyControllerGenerator extends SpeedControllerGenera
     /** Returns the first higher bound for the dichotomy */
     protected abstract double getFirstHighEstimate();
 
+    /** Returns the first guess for the dichotomy */
+    protected abstract double getFirstGuess();
+
     /** Generates a set of speed controllers given the dichotomy value */
     protected abstract Set<SpeedController> getSpeedControllers(TrainSchedule schedule,
                                                                 double value, double begin, double end);
@@ -74,38 +77,36 @@ public abstract class DichotomyControllerGenerator extends SpeedControllerGenera
     private Set<SpeedController> binarySearch(Simulation sim, TrainSchedule schedule) {
         var lowerBound = getFirstLowEstimate();
         var higherBound = getFirstHighEstimate();
+        var firstGuess = getFirstGuess();
+
         // marche de base
         // the binary search condition should be on the total time
         var time = evalRunTime(sim, schedule, maxSpeedControllers);
         var targetTime = getTargetTime(time);
 
-        double nextValue;
+        double nextValue = firstGuess;
         Set<SpeedController> nextSpeedControllers;
         int i = 0;
         do {
-            nextValue = (lowerBound + higherBound) / 2;
             nextSpeedControllers = getSpeedControllers(schedule, nextValue, sectionBegin, sectionEnd);
             var expectedTimes = getExpectedTimes(sim, schedule,
                     nextSpeedControllers, 1);
-            //var expectedTimes = getExpectedTimes(sim, schedule,
-            //        nextSpeedControllers, 1, beginLocation, endLocation, initialSpeed);
             time = expectedTimes.lastEntry().getValue() - expectedTimes.firstEntry().getValue();
             if (time > targetTime)
                 lowerBound = nextValue;
             else
                 higherBound = nextValue;
-            // saveGraph(nextSpeedControllers, sim, schedule, "speeds-" + i + ".csv");
+            nextValue = (lowerBound + higherBound) / 2;
             if (i++ > 20)
                 throw new RuntimeException("Did not converge");
-        } while (Math.abs(time - targetTime) > precision);
+        } while( Math.abs(time - targetTime) > precision);
         return nextSpeedControllers;
     }
 
     /** Saves a speed / position graph, for debugging purpose */
     public void saveGraph(Set<SpeedController> speedControllers, Simulation sim, TrainSchedule schedule, String path) {
         try {
-            PrintWriter writer = null;
-            writer = new PrintWriter(path, "UTF-8");
+            PrintWriter writer = new PrintWriter(path, "UTF-8");
             writer.println("position,speed");
             var expectedSpeeds = getExpectedSpeeds(sim, schedule, speedControllers, 0.01);
             for (var entry : expectedSpeeds.entrySet()) {

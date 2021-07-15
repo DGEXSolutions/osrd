@@ -21,7 +21,7 @@ public final class LimitAnnounceSpeedController extends SpeedController {
         this.gamma = gamma;
     }
 
-    /** Create LimitannouceSpeedController from initial speed */
+    /** Create LimitannouceSpeedController from initial speed and target position */
     public static LimitAnnounceSpeedController create(
             double initialSpeed,
             double targetSpeed,
@@ -33,6 +33,22 @@ public final class LimitAnnounceSpeedController extends SpeedController {
                 targetSpeed,
                 targetPosition - requiredBrakingDistance,
                 targetPosition,
+                gamma
+        );
+    }
+
+    /** Create LimitannouceSpeedController from initial speed and initial position */
+    public static LimitAnnounceSpeedController createFromInitialPosition(
+            double initialSpeed,
+            double targetSpeed,
+            double initialPosition,
+            double gamma
+    ) {
+        var requiredBrakingDistance = (initialSpeed * initialSpeed - targetSpeed * targetSpeed) / 2 * gamma;
+        return new LimitAnnounceSpeedController(
+                targetSpeed,
+                initialPosition,
+                initialPosition + requiredBrakingDistance,
                 gamma
         );
     }
