@@ -6,6 +6,7 @@ import com.squareup.moshi.*;
 import com.squareup.moshi.adapters.PolymorphicJsonAdapterFactory;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import fr.sncf.osrd.cbtc.CBTCNavigatePhase;
 import fr.sncf.osrd.infra.OperationalPoint;
 import fr.sncf.osrd.infra.StopActionPoint;
 import fr.sncf.osrd.infra.TVDSection;
@@ -31,6 +32,7 @@ import fr.sncf.osrd.train.decisions.InteractiveInput;
 import fr.sncf.osrd.train.decisions.KeyboardInput;
 import fr.sncf.osrd.train.decisions.TrainDecisionMaker;
 import fr.sncf.osrd.train.decisions.TrainDecisionMaker.DefaultTrainDecisionMaker;
+import fr.sncf.osrd.train.phases.NavigatePhase;
 import fr.sncf.osrd.train.phases.Phase;
 import fr.sncf.osrd.train.phases.PhaseState;
 import fr.sncf.osrd.train.phases.SignalNavigatePhase;
@@ -75,7 +77,12 @@ public class ChangeSerializer {
             .add(new SerializableDoubleAdapter())
             .add(adaptPolymorphicType(Change.class, "changeType"))
             .add(PolymorphicJsonAdapterFactory.of(Phase.class, "phaseType")
-                    .withSubtype(SignalNavigatePhase.class, "navigatePhase")
+                    .withSubtype(NavigatePhase.class, "navigatePhase")
+                    .withSubtype(SignalNavigatePhase.class, "signalNavigatePhase")
+                    .withSubtype(CBTCNavigatePhase.class, "cbtcNavigatePhase"))
+            .add(PolymorphicJsonAdapterFactory.of(NavigatePhase.class, "navigatePhaseType")
+                    .withSubtype(SignalNavigatePhase.class, "signalNavigatePhase")
+                    .withSubtype(CBTCNavigatePhase.class, "cbtcNavigatePhase")
             )
             .add(adaptPolymorphicType(PhaseState.class, "phaseStateType"))
             .add(PolymorphicJsonAdapterFactory.of(ActionPoint.class, "actionPointType")
@@ -84,7 +91,8 @@ public class ChangeSerializer {
                     .withSubtype(Signal.class, "signal")
                     .withSubtype(OperationalPoint.class, "operationalPoint")
                     .withSubtype(StopActionPoint.class, "stopActionPoint")
-                    .withSubtype(SignalNavigatePhase.SwitchActionPoint.class, "switch")
+                    .withSubtype(NavigatePhase.SwitchActionPoint.class,
+                            "switch")
             )
             .add(PolymorphicJsonAdapterFactory.of(RSValue.class, "valueType")
                     .withSubtype(RSAspectSet.class, "aspectSet")

@@ -1,6 +1,7 @@
 package fr.sncf.osrd.railjson.parser;
 
 import fr.sncf.osrd.RollingStock;
+import fr.sncf.osrd.cbtc.CBTCNavigatePhase;
 import fr.sncf.osrd.railjson.schema.common.ID;
 import fr.sncf.osrd.railjson.schema.infra.RJSRoute;
 import fr.sncf.osrd.railjson.schema.schedule.RJSTrainStop;
@@ -209,6 +210,15 @@ public class RJSTrainScheduleParser {
                 expectedPath,
                 stops
             );
+        } else if (rjsPhase.getClass() == RJSTrainPhase.CBTC.class) {
+            var rjsCBTC = (RJSTrainPhase.CBTC) rjsPhase;
+            var driverSightDistance = rjsCBTC.driverSightDistance;
+            if (Double.isNaN(driverSightDistance) || driverSightDistance < 0)
+                throw new InvalidSchedule("invalid driver sight distance");
+
+            var endLocation = parseLocation(infra, rjsCBTC.endLocation);
+            return CBTCNavigatePhase.from(driverSightDistance, startLocation,
+                    endLocation, expectedPath, stops);
         }
         throw new RuntimeException("unknown train phase");
     }

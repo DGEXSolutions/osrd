@@ -2,6 +2,7 @@ package fr.sncf.osrd.railjson.schema.schedule;
 
 import com.squareup.moshi.Json;
 import com.squareup.moshi.adapters.PolymorphicJsonAdapterFactory;
+
 import fr.sncf.osrd.railjson.schema.common.RJSTrackLocation;
 
 /**
@@ -15,6 +16,7 @@ public abstract class RJSTrainPhase {
     public static final PolymorphicJsonAdapterFactory<RJSTrainPhase> adapter = (
             PolymorphicJsonAdapterFactory.of(RJSTrainPhase.class, "type")
                     .withSubtype(RJSTrainPhase.Navigate.class, "navigate")
+                    .withSubtype(RJSTrainPhase.CBTC.class, "cbtc")
     );
 
     /** The location of the head of the train when it exits this phase */
@@ -22,6 +24,12 @@ public abstract class RJSTrainPhase {
     public RJSTrackLocation endLocation;
 
     public static final class Navigate extends RJSTrainPhase {
+        /** The distance at which the driver can see objects on the tracks */
+        @Json(name = "driver_sight_distance")
+        public double driverSightDistance;
+    }
+    
+    public static final class CBTC extends RJSTrainPhase {
         /** The distance at which the driver can see objects on the tracks */
         @Json(name = "driver_sight_distance")
         public double driverSightDistance;
