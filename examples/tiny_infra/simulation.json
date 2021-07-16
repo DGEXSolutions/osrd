@@ -235,7 +235,44 @@
             {"speed": 140, "max_effort": 0},
             {"speed": 150, "max_effort": 0},
             {"speed": 160, "max_effort": 0}]
-          }
+          },
+        "effort_curve_selectors": [
+          {"condition": {"catenary_type": "A"},
+            "effort_curve": "tractive_effort_curve_catenary_A"},
+
+          {"condition": {"catenary_type": "A1"},
+            "effort_curve": "tractive_effort_curve_catenary_A1"},
+
+          {"condition": {"catenary_type": "B"},
+            "effort_curve": "tractive_effort_curve_catenary_B"},
+
+          {"condition": {"catenary_type": "B1"},
+            "effort_curve": "tractive_effort_curve_catenary_B1"},
+
+          {"condition": {"catenary_type": "C"},
+            "effort_curve": "tractive_effort_curve_catenary_C"},
+
+          {"condition": {"catenary_type": "D"},
+            "effort_curve": "tractive_effort_curve_catenary_D"},
+
+          {"condition": {"catenary_type": "E"},
+            "effort_curve": "tractive_effort_curve_catenary_E"},
+
+          {"condition": {"catenary_type": "F"},
+            "effort_curve": "tractive_effort_curve_catenary_F"},
+
+          {"condition": {"catenary_type": "O"},
+            "effort_curve": "tractive_effort_curve_catenary_O"},
+
+          {"condition": {"catenary_type": "25k"},
+            "effort_curve": "tractive_effort_curve_catenary_25k"},
+
+          {"condition": {"catenary_type": "22/25k"},
+            "effort_curve": "tractive_effort_curve_catenary_20/22k"},
+
+          {"condition": {"catenary_type": "battery"},
+            "effort_curve": "tractive_effort_curve_catenary_battery"}
+        ]
       }
     ],
   "train_schedules": [

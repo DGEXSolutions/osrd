@@ -62,6 +62,10 @@ public class RJSRollingStock implements Identified {
     @Json(name = "tractive_effort_curves")
     public Map<String, RJSTractiveEffortPoint[]> tractiveEffortCurves;
 
+    @Json(name = "effort_curve_selectors")
+    public RJSEffortCurveSelector[] effortCurveSelectors;
+
+
 
     /** Creates a new rolling stock */
     public RJSRollingStock(
@@ -108,6 +112,25 @@ public class RJSRollingStock implements Identified {
         this.timetableGamma = Double.NaN;
         this.tractiveEffortCurves = null;
 
+    }
+    public static final class RJSEffortCurveSelector {
+        @Json(name = "effort_curve")
+        public String effortCurve;
+        public RJSEffortCurveSelectorCondition condition;
+
+        public RJSEffortCurveSelector(String effortCurve, RJSEffortCurveSelectorCondition condition) {
+            this.effortCurve = effortCurve;
+            this.condition = condition;
+        }
+    }
+
+    public static final class RJSEffortCurveSelectorCondition {
+        @Json(name = "catenary_type")
+        public String catenaryType;
+
+        public RJSEffortCurveSelectorCondition(String catenaryType) {
+            this.catenaryType = catenaryType;
+        }
     }
 
     public static final class RJSTractiveEffortPoint {
