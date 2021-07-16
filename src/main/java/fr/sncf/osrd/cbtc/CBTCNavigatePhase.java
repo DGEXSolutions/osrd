@@ -139,7 +139,8 @@ public final class CBTCNavigatePhase extends NavigatePhase {
             // The train didn't reached the action point (stopped because of signalisation)
             var event = TrainMoveEvent.plan(sim, trainState.time, train, simulationResult);
 
-            if(train.getLastState().status != TrainStatus.REACHED_DESTINATION && train.getLastState().status != TrainStatus.STOP){
+            // Test if the train does not move
+            if(trainState.speed >= 1e-6 && trainState.status != TrainStatus.REACHED_DESTINATION && trainState.status != TrainStatus.STOP){
                 CBTCEvent.plan(sim, nextTime, train);
             }
 
