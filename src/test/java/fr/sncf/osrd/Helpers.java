@@ -44,8 +44,8 @@ public class Helpers {
 
     public static final class TestEvent extends TimelineEvent {
         public final String data;
-        private final BiConsumer<Simulation, TestEvent> onOccurrenceCallback;
-        private final BiConsumer<Simulation, TestEvent> onCancellationCallback;
+        private final transient BiConsumer<Simulation, TestEvent> onOccurrenceCallback;
+        private final transient BiConsumer<Simulation, TestEvent> onCancellationCallback;
 
         private TestEvent(
                 TimelineEventId eventId,
@@ -129,8 +129,8 @@ public class Helpers {
 
         public static class TestEventPlanned extends Simulation.TimelineEventCreated {
             public final String data;
-            private final BiConsumer<Simulation, TestEvent> onOccurrenceCallback;
-            private final BiConsumer<Simulation, TestEvent> onCancellationCallback;
+            private final transient BiConsumer<Simulation, TestEvent> onOccurrenceCallback;
+            private final transient BiConsumer<Simulation, TestEvent> onCancellationCallback;
 
             private TestEventPlanned(
                     Simulation sim,

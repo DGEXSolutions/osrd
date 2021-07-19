@@ -36,10 +36,10 @@ public class TowerState {
     }
 
     /**
-     * Create a switch post with given theoric trains successions tables
+     * Create a switch post with given theoretic trains successions tables
      * @param infra the given infrastructure
-     * @param initTables the given trains successions tables, exactly one per switch
-     * @return a TowerState with the given trains succcessions tables
+     * @param initTables the given trains succession tables, exactly one per switch
+     * @return a TowerState with the given trains succession tables
      */
     public static TowerState makeTowerState(Infra infra, List<SuccessionTable> initTables) {
         

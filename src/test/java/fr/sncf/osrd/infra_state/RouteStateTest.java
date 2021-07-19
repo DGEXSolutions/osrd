@@ -1,18 +1,33 @@
 package fr.sncf.osrd.infra_state;
 
 import static fr.sncf.osrd.Helpers.*;
+import static fr.sncf.osrd.infra.Infra.parseFromFile;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
+import fr.sncf.osrd.DebugViewer;
+import fr.sncf.osrd.config.Config;
+import fr.sncf.osrd.config.JsonConfig;
+import fr.sncf.osrd.infra.Infra;
 import fr.sncf.osrd.infra.InvalidInfraException;
 import fr.sncf.osrd.infra.trackgraph.SwitchPosition;
+import fr.sncf.osrd.railjson.parser.RJSSimulationParser;
 import fr.sncf.osrd.railjson.parser.RailJSONParser;
+import fr.sncf.osrd.railjson.parser.exceptions.InvalidRollingStock;
+import fr.sncf.osrd.railjson.parser.exceptions.InvalidSchedule;
+import fr.sncf.osrd.railjson.schema.RJSSimulation;
 import fr.sncf.osrd.railjson.schema.common.ID;
+import fr.sncf.osrd.railjson.schema.infra.RJSRoute;
 import fr.sncf.osrd.railjson.schema.infra.RJSSwitch;
 import fr.sncf.osrd.simulation.Simulation;
 import fr.sncf.osrd.simulation.SimulationError;
 import fr.sncf.osrd.simulation.changelog.ArrayChangeLog;
+import fr.sncf.osrd.utils.PathUtils;
+import fr.sncf.osrd.utils.moshi.MoshiUtils;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -20,9 +35,7 @@ public class RouteStateTest {
     @Test
     public void testSimpleReserve() throws InvalidInfraException {
         final var infra = getBaseInfra();
-        assert infra != null;
         final var config = getBaseConfig();
-        assert config != null;
 
         var sim = Simulation.createFromInfraAndEmptySuccessions(RailJSONParser.parse(infra), 0, null);
 
@@ -39,9 +52,7 @@ public class RouteStateTest {
     @Test
     public void testAwaitSwitchChange() throws InvalidInfraException, SimulationError {
         final var infra = getBaseInfra();
-        assert infra != null;
         final var config = getBaseConfig();
-        assert config != null;
 
         config.trainSchedules.clear();
 
@@ -62,9 +73,7 @@ public class RouteStateTest {
     @Test
     public void testSeveralSwitches() throws InvalidInfraException, SimulationError {
         final var infra = getBaseInfra();
-        assert infra != null;
         final var config = getBaseConfig();
-        assert config != null;
 
         config.trainSchedules.clear();
 
@@ -94,9 +103,7 @@ public class RouteStateTest {
     @Test
     public void testOccupied() throws InvalidInfraException {
         final var infra = getBaseInfra();
-        assert infra != null;
         final var config = getBaseConfig();
-        assert config != null;
 
         config.trainSchedules.clear();
 
@@ -119,9 +126,7 @@ public class RouteStateTest {
     @Test
     public void testReserveStatusChanges() throws InvalidInfraException, SimulationError {
         final var infra = getBaseInfra();
-        assert infra != null;
         final var config = getBaseConfig();
-        assert config != null;
 
         var changelog = new ArrayChangeLog();
 
@@ -149,5 +154,134 @@ public class RouteStateTest {
                 .map(Object::toString)
                 .collect(Collectors.toSet());
         assertEquals(expectedChanges, changesSet);
+    }
+
+    @Test
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public void testReserveRouteTrainStartNotOnFirstTrackSection()
+            throws InvalidInfraException, IOException, InvalidRollingStock, InvalidSchedule {
+        final var infra = getBaseInfra();
+        var path = getResourcePath("tiny_infra/config_railjson.json");
+        var baseDirPath = path.getParent();
+        var jsonConfig = MoshiUtils.deserialize(JsonConfig.adapter, path);
+        final var infraPath = PathUtils.relativeTo(baseDirPath, jsonConfig.infraPath);
+        final var rjsInfra = parseFromFile(jsonConfig.infraType, infraPath.toString());
+        var schedulePath = PathUtils.relativeTo(baseDirPath, jsonConfig.simulationPath);
+        var schedule = MoshiUtils.deserialize(RJSSimulation.adapter, schedulePath);
+
+        schedule.trainSchedules.forEach(s -> {
+            s.routes = (ID<RJSRoute>[]) new ID[]{
+                    new ID<RJSRoute>("rt.C3-S7"),
+                    new ID<RJSRoute>("rt.S7-buffer_stop_c"),
+            };
+            s.initialHeadLocation.trackSection = new ID<>("ne.micro.foo_to_bar");
+            s.initialHeadLocation.offset = 10;
+        });
+
+
+        var trainSchedules = RJSSimulationParser.parse(rjsInfra, schedule);
+        var config = new Config(
+                jsonConfig.simulationTimeStep,
+                rjsInfra,
+                trainSchedules,
+                null,
+                jsonConfig.simulationStepPause,
+                false,
+                jsonConfig.realTimeViewer,
+                jsonConfig.changeReplayCheck
+        );
+        var sim = Simulation.createFromInfraAndEmptySuccessions(RailJSONParser.parse(infra),
+                0, null);
+
+        run(sim, config);
+    }
+
+    @Test
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public void testReserveRouteTrainStartNotOnFirstTVD()
+            throws InvalidInfraException, IOException, InvalidRollingStock, InvalidSchedule {
+        final var infra = getBaseInfra();
+        var path = getResourcePath("tiny_infra/config_railjson.json");
+        var baseDirPath = path.getParent();
+        var jsonConfig = MoshiUtils.deserialize(JsonConfig.adapter, path);
+        final var infraPath = PathUtils.relativeTo(baseDirPath, jsonConfig.infraPath);
+        final var rjsInfra = parseFromFile(jsonConfig.infraType, infraPath.toString());
+        var schedulePath = PathUtils.relativeTo(baseDirPath, jsonConfig.simulationPath);
+        var schedule = MoshiUtils.deserialize(RJSSimulation.adapter, schedulePath);
+
+        schedule.trainSchedules.forEach(s -> {
+            s.routes = (ID<RJSRoute>[]) new ID[]{
+                    new ID<RJSRoute>("rt.C3-S7"),
+                    new ID<RJSRoute>("rt.S7-buffer_stop_c"),
+            };
+            s.initialHeadLocation.trackSection = new ID<>("ne.micro.foo_to_bar");
+            s.initialHeadLocation.offset = 100;
+        });
+
+
+        var trainSchedules = RJSSimulationParser.parse(rjsInfra, schedule);
+        var config = new Config(
+                jsonConfig.simulationTimeStep,
+                rjsInfra,
+                trainSchedules,
+                null,
+                jsonConfig.simulationStepPause,
+                false,
+                jsonConfig.realTimeViewer,
+                jsonConfig.changeReplayCheck
+        );
+        var sim = Simulation.createFromInfraAndEmptySuccessions(RailJSONParser.parse(infra),
+                0, null);
+
+        run(sim, config);
+    }
+
+    @Test
+    public void testCircularInfraReserves() throws InvalidInfraException {
+        final var infra = getBaseInfra("circular_infra/infra.json");
+        final var config = getBaseConfig("circular_infra/config.json");
+
+        var changelog = new ArrayChangeLog();
+
+        var sim = Simulation.createFromInfraAndSuccessions(RailJSONParser.parse(infra),
+                config.switchSuccessions, 0, changelog);
+
+        config.trainSchedules.remove(2);
+        config.trainSchedules.remove(1);
+
+        run(sim, config);
+
+        var changesSet = changelog.publishedChanges.stream()
+                .filter(x -> x instanceof RouteState.RouteStatusChange)
+                .map(Object::toString)
+                .collect(Collectors.toSet());
+
+        // We check that every route has been reserved and occupied at least once
+        for (int i = 0; i < infra.routes.size(); i++) {
+            for (var status : new RouteStatus[]{RouteStatus.RESERVED, RouteStatus.OCCUPIED}) {
+                var expected = new RouteState.RouteStatusChange(sim, sim.infraState.getRouteState(i), status);
+                assert changesSet.contains(expected.toString());
+            }
+        }
+    }
+
+    @Test
+    @Disabled("Fixing this requires changes in the API and middle/front end, it will be done later")
+    public void testCircularInfraRouteIndexes() throws InvalidInfraException {
+        final var infra = getBaseInfra("circular_infra/infra.json");
+        final var config = getBaseConfig("circular_infra/config.json");
+
+        var changelog = new ArrayChangeLog();
+
+        var sim = Simulation.createFromInfraAndSuccessions(RailJSONParser.parse(infra),
+                config.switchSuccessions, 0, changelog);
+
+        run(sim, config);
+
+        for (var train : sim.trains.values()) {
+            var trainState = train.getLastState();
+            var path = train.schedule.plannedPath;
+            assertEquals(path.routePath.size() - 1, trainState.routeIndex);
+        }
     }
 }

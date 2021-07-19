@@ -12,11 +12,11 @@ import java.util.ArrayList;
 
 @SuppressWarnings("MissingJavadocMethod")
 public class SignalSimulationTest {
-    public static final class SignalAspectChange extends Change {
+    public static final class TestSignalAspectChange extends Change {
         public final TestSignal signal;
         public final TestSignal.Aspect newAspect;
 
-        public SignalAspectChange(Simulation sim, TestSignal signal, TestSignal.Aspect newAspect) {
+        public TestSignalAspectChange(Simulation sim, TestSignal signal, TestSignal.Aspect newAspect) {
             super(sim);
             this.signal = signal;
             this.newAspect = newAspect;
@@ -145,7 +145,7 @@ public class SignalSimulationTest {
             if (newAspect == aspect)
                 return;
 
-            var change = new SignalAspectChange(sim, this, newAspect);
+            var change = new TestSignalAspectChange(sim, this, newAspect);
             change.apply();
             sim.publishChange(change);
 
@@ -155,7 +155,7 @@ public class SignalSimulationTest {
 
         private void masterAspectChanged(
                 Simulation sim,
-                SignalAspectChange event
+                TestSignalAspectChange event
         )  {
             var newAspect = aspect;
             if (event.newAspect == RED) {
